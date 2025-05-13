@@ -107,6 +107,33 @@ export interface MembershipGridResponseDto {
   meta: PaginationMetaDto;
 }
 
+export interface TeamListRequestDto {
+  /**
+   * Page number for paginated results, starting from 1.
+   * @default 1
+   */
+  page: number;
+  /**
+   * Number of team to return per page.
+   * @default 20
+   */
+  limit: number;
+}
+
+export interface TeamListDto {
+  /** Unique identifier of the team. */
+  id: string;
+  /** Name of the team. */
+  name: string;
+}
+
+export interface TeamListResponseDto {
+  /** List of team records. */
+  data: TeamListDto[];
+  /** Pagination metadata for the memberships. */
+  meta: PaginationMetaDto;
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -303,6 +330,24 @@ export class Api<
     grid: (data: MembershipsGridRequestDto, params: RequestParams = {}) =>
       this.request<MembershipGridResponseDto, any>({
         path: `/api/v1/memberships/gird`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+  };
+  teams = {
+    /**
+     * No description
+     *
+     * @tags Teams
+     * @name List
+     * @request POST:/api/v1/teams/gird
+     */
+    list: (data: TeamListRequestDto, params: RequestParams = {}) =>
+      this.request<TeamListResponseDto, any>({
+        path: `/api/v1/teams/gird`,
         method: "POST",
         body: data,
         type: ContentType.Json,

@@ -7,6 +7,9 @@ import {
   IsObject,
   ValidateNested,
   IsDateString,
+  Min,
+  Max,
+  IsNumber,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
@@ -131,12 +134,14 @@ export class MembershipsGridRequestDto {
   @IsOptional()
   @IsEnum(SortDirection)
   sortDirection?: SortDirection = SortDirection.ASC;
-
   @ApiProperty({
     default: 1,
     description: 'Page number for paginated results, starting from 1.',
   })
   @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(1_000)
   page: number = 1;
 
   @ApiProperty({
@@ -144,6 +149,9 @@ export class MembershipsGridRequestDto {
     description: 'Number of memberships to return per page.',
   })
   @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(1_000)
   limit: number = 20;
 }
 

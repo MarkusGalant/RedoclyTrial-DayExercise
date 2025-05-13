@@ -12,7 +12,7 @@ import {
   MembershipsGridDto,
   MembershipsGridSortField,
 } from './dtos/grid.dto';
-import { isDefined, IsDefined } from 'class-validator';
+import { isDefined } from 'class-validator';
 
 @Injectable()
 export class MembershipsService {
@@ -25,7 +25,6 @@ export class MembershipsService {
     const { roles, isGuest, teams } = filter || {};
     const where: any = {};
 
-    // Filter by roles
     if (!!roles && roles.length > 0) {
       where.role = { in: roles };
     }
@@ -38,37 +37,32 @@ export class MembershipsService {
         },
       };
     }
-    // Filter by membership status
-
-    // Filter by guest status
     if (isDefined(isGuest)) {
       where.isGuest = isGuest;
     }
 
-    // Filter by teams
-    if (teams?.teamIds && teams.teamIds.length > 0) {
-      where.user = {
-        ...where.user,
-        teamLinks: {
-          some: {
-            teamId: { in: teams.teamIds },
+    if (isDefined(teams)) {
+      if (teams.teamIds && teams.teamIds.length > 0)
+        where.user = {
+          ...where.user,
+          teamLinks: {
+            some: {
+              teamId: { in: teams.teamIds },
+            },
           },
-        },
-      };
+        };
+
+      if (teams.noTeam) {
+        where.user = {
+          ...where.user,
+          teamLinks: {
+            none: {},
+          },
+        };
+      }
     }
 
-    // Filter users with no team assigned
-    if (teams?.noTeam) {
-      where.user = {
-        ...where.user,
-        teamLinks: {
-          none: {},
-        },
-      };
-    }
-
-    // Search by name or email
-    if (search) {
+    if (isDefined(search)) {
       where.user = {
         ...where.user,
         OR: [{ email: { contains: search } }, { name: { contains: search } }],
@@ -77,8 +71,6 @@ export class MembershipsService {
 
     const orderBy = this.getOrderByField(sortBy, sortDirection);
 
-    console.log('where', where);
-    // Fetch memberships with pagination and sorting
     const [data, totalCount] = await this.prisma.$transaction([
       this.prisma.membership.findMany({
         where,
@@ -104,25 +96,23 @@ export class MembershipsService {
       this.prisma.membership.count({ where }),
     ]);
 
-    const memberships = data.map(
-      (membership): MembershipsGridDto => ({
-        id: membership.id,
-        email: membership.user.email,
-        name: membership.user.name,
-        role: membership.role,
-        isGuest: membership.isGuest,
-        lastLoginAt: membership.user.lastLoginAt,
-        teams: membership.user.teamLinks.map((link) => ({
-          id: link.team.id,
-          name: link.team.name,
-        })),
-        createdAt: membership.createdAt,
-        updatedAt: membership.updatedAt,
-      }),
-    );
-
     return {
-      data: memberships,
+      data: data.map(
+        (membership): MembershipsGridDto => ({
+          id: membership.id,
+          email: membership.user.email,
+          name: membership.user.name,
+          role: membership.role,
+          isGuest: membership.isGuest,
+          lastLoginAt: membership.user.lastLoginAt,
+          teams: membership.user.teamLinks.map((link) => ({
+            id: link.team.id,
+            name: link.team.name,
+          })),
+          createdAt: membership.createdAt,
+          updatedAt: membership.updatedAt,
+        }),
+      ),
       meta: {
         totalCount,
         page,
@@ -175,18 +165,18 @@ export class MembershipsService {
             lastLoginAt: direction,
           },
         };
-      case MembershipsGridSortField.TEAMS: {
-        return {
-          user: {
-            teamLinks: {
-              //TODO: Sort by team name
-              // team: {
-              //   name: direction,
-              // },
-            },
-          },
-        };
-      }
+      //TDO: Fix team sorting
+      // case MembershipsGridSortField.TEAMS: {
+      //   return {
+      //     user: {
+      //       teamLinks: {
+      //         team: {
+      //           name: direction,
+      //         },
+      //       },
+      //     },
+      //   };
+      // }
       default:
         throw new Error(`Unknown sort field.`);
     }

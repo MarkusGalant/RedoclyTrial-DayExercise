@@ -1,5 +1,5 @@
 
-import { Box, CssBaseline, ThemeProvider } from '@mui/material';
+import { Box, CssBaseline, Stack, ThemeProvider } from '@mui/material';
 import Container from '@mui/material/Container';
 
 import theme from './theme';
@@ -16,10 +16,10 @@ export default function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Container>
-          <Box>
-            <GridPage />
+          <GridPage />
+          <Stack>
             <Copyright />
-          </Box>
+          </Stack>
         </Container>
       </ThemeProvider>
     </QueryClientProvider>

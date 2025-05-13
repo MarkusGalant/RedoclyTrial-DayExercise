@@ -1,7 +1,8 @@
-import { Link, Typography } from "@mui/material";
+import { Link, Stack, Typography } from "@mui/material";
 
 export function Copyright() {
-    return (
+  return (
+    <Stack sx={{ height: 64 }} justifyContent="center" alignItems="center">
       <Typography
         variant="body2"
         align="center"
@@ -15,6 +16,6 @@ export function Copyright() {
         </Link>{' '}
         {new Date().getFullYear()}.
       </Typography>
-    );
-  }
-  
+    </Stack>
+  );
+}
