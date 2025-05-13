@@ -1,4 +1,4 @@
-import React, { useState, } from 'react';
+import React, { useMemo, useState, } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -163,9 +163,12 @@ const GridPage: React.FC = () => {
   const clearFilters = () => {
     serFilter(createFilter());
   }
+  const filtersCount = useMemo(() =>
+    [filter.role !== "ALL", filter.guest !== "ALL", filter.lastLogin !== "ANY_TIME", filter.teams !== "ALL_TEAM"].filter(it => !!it).length
+    , [filter])
 
   return (
-    <Box>
+    <Stack py={4}>
       {/* Tabs */}
       <Tabs value={0} textColor="inherit" indicatorColor="primary">
         <Tab label="People" />
@@ -176,7 +179,7 @@ const GridPage: React.FC = () => {
       <Stack direction="row" justifyContent="flex-end" alignItems="center" mt={2} mb={1}>
         {/* Filters button + search */}
         <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-          <Badge badgeContent={4} color="primary">
+          <Badge badgeContent={filtersCount} color="primary">
             <Button variant="outlined" onClick={() => setIsFiltersOpen(val => !val)} >Filters</Button>
           </Badge>
           <TextField
@@ -307,7 +310,7 @@ const GridPage: React.FC = () => {
         onSortModelChange={(model) => setSort(convertMuiSortModel(model))}
         getRowId={(row: MembershipsGridDto) => row.id}
       />
-    </Box >
+    </Stack >
   );
 };
 
